@@ -1,0 +1,53 @@
+#A pipeline that combines a dense Retriever with a keyword-based Retriever
+version: '1.3.0'
+name: 'hybrid_pipeline'
+
+components:
+  - name: DocumentStore
+    type: DeepsetCloudDocumentStore
+    params: {}
+  - name: ESRetriever
+    type: ElasticsearchRetriever
+    params:
+      document_store: DocumentStore
+  - name: EmbeddingRetriever
+    type: EmbeddingRetriever
+    params:
+      document_store: DocumentStore
+      embedding_model: sentence-transformers/msmarco-distilbert-multilingual-en-de-v2-tmp-lng-aligned
+      model_format: sentence_transformers
+      top_k: 20
+  - name: JoinResults
+    type: JoinDocuments
+    params:
+      join_mode: reciprocal_rank_fusion
+  - name: TextFileConverter
+    type: TextConverter
+    params: {}
+  - name: Preprocessor
+    type: PreProcessor
+    params:
+      split_by: passage
+      split_length: 1
+      split_respect_sentence_boundary: false
+
+pipelines:
+  - name: query
+    nodes:
+      - name: ESRetriever
+        inputs: [Query]
+      - name: EmbeddingRetriever
+        inputs: [Query]
+      - name: JoinResults
+        inputs: [ESRetriever, EmbeddingRetriever]
+
+  - name: indexing
+    nodes:
+      - name: TextFileConverter
+        inputs: [File]
+      - name: Preprocessor
+        inputs: [TextFileConverter]
+      - name: EmbeddingRetriever
+        inputs: [Preprocessor]
+      - name: DocumentStore
+        inputs: [EmbeddingRetriever]

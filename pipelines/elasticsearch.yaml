@@ -1,0 +1,45 @@
+# A pipeline for TXT and PDFs simultaneously, retrieval is done only with Elasticsearch
+version: '1.3.0'
+name: 'Elasticsearch_indexing'
+
+components:
+  - name: DocumentStore
+    type: DeepsetCloudDocumentStore
+  - name: Retriever
+    type: ElasticsearchRetriever
+    params:
+      document_store: DocumentStore
+      top_k: 20
+  - name: FileTypeClassifier
+    type: FileTypeClassifier
+  - name: TextFileConverter
+    type: TextConverter
+  - name: PDFConverter
+    type: PDFToTextConverter
+  - name: Preprocessor
+    type: PreProcessor
+    params:
+      split_by: word
+      split_length: 500
+      split_overlap: 50
+      split_respect_sentence_boundary: True
+
+pipelines:
+  - name: query
+    nodes:
+      - name: Retriever
+        inputs: [Query]
+  - name: indexing
+    nodes:
+      - name: FileTypeClassifier
+        inputs: [File]
+      - name: TextFileConverter
+        inputs: [FileTypeClassifier.output_1]
+      - name: PDFConverter
+        inputs: [FileTypeClassifier.output_2]
+      - name: Preprocessor
+        inputs: [TextFileConverter, PDFConverter]
+      - name: Retriever
+        inputs: [Preprocessor]
+      - name: DocumentStore
+        inputs: [Retriever]
