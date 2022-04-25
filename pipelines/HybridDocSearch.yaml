@@ -17,7 +17,7 @@ components:
     type: EmbeddingRetriever
     params:
       document_store: DocumentStore
-      embedding_model: sentence-transformers/msmarco-distilbert-multilingual-en-de-v2-tmp-lng-aligned
+      embedding_model: sentence-transformers/multi-qa-mpnet-base-dot-v1
       model_format: sentence_transformers
       top_k: 20
   # A node that joins the results from both Retrievers
@@ -37,7 +37,7 @@ components:
       # As we are using a dense retriever we recommend splitting to smaller documents
       split_by: word
       split_length: 250
-      split_overlap: 30
+      split_overlap: 50
       split_respect_sentence_boundary: True
 
 # Sticking the nodes together to one query pipeline and one indexing pipeline
