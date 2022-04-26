@@ -1,0 +1,49 @@
+# A baseline pipeline for document search that uses a traditional "sparse retriever" (using elasticsearch's BM25 algorithm).
+# It relies on matching keywords between query and document and is often a solid baseline to start with
+version: '1.3.0'
+name: 'SparseDocSearch_BM25'
+
+# All nodes that we need for our pipelines
+components:
+  - name: DocumentStore
+    type: DeepsetCloudDocumentStore
+  - name: Retriever
+    type: ElasticsearchRetriever
+    params:
+      document_store: DocumentStore
+      top_k: 20
+  - name: FileTypeClassifier
+    type: FileTypeClassifier
+  - name: TextFileConverter
+    type: TextConverter
+  - name: PDFConverter
+    type: PDFToTextConverter
+  - name: Preprocessor
+    type: PreProcessor
+    params:
+      # As we are using a sparse retriever we recommend splitting to slightly longer documents
+      split_by: word
+      split_length: 500
+      split_overlap: 30
+      split_respect_sentence_boundary: True
+
+# Sticking the nodes together to one query pipeline and one indexing pipeline
+pipelines:
+  - name: query
+    nodes:
+      - name: Retriever
+        inputs: [Query]
+  - name: indexing
+    nodes:
+      - name: FileTypeClassifier
+        inputs: [File]
+      - name: TextFileConverter
+        inputs: [FileTypeClassifier.output_1]
+      - name: PDFConverter
+        inputs: [FileTypeClassifier.output_2]
+      - name: Preprocessor
+        inputs: [TextFileConverter, PDFConverter]
+      - name: Retriever
+        inputs: [Preprocessor]
+      - name: DocumentStore
+        inputs: [Retriever]

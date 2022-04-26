@@ -1,0 +1,61 @@
+# A default Question Answering pipeline for German with a dense, multilingual EmbeddingRetriever and a German QA model
+version: '1.3.0'
+name: 'QuestionAnswering_de'
+
+# All nodes that we need for our pipelines
+components:
+  - name: DocumentStore
+    type: DeepsetCloudDocumentStore
+    params:
+      similarity: cosine
+  # A fast retriever that finds the top 20 candidate documents
+  - name: Retriever
+    type: EmbeddingRetriever
+    params:
+      document_store: DocumentStore
+      embedding_model: sentence-transformers/msmarco-distilbert-multilingual-en-de-v2-tmp-lng-aligned
+      model_format: sentence_transformers
+      top_k: 20
+  # A "Reader" model that goes through those 20 candidate documents and identifies the exact answer
+  - name: Reader
+    type: FARMReader
+    params:
+      model_name_or_path: deepset/gelectra-large-germanquad
+      context_window_size: 700
+  - name: FileTypeClassifier
+    type: FileTypeClassifier
+  - name: TextFileConverter
+    type: TextConverter
+  - name: PDFConverter
+    type: PDFToTextConverter
+  - name: Preprocessor
+    type: PreProcessor
+    params:
+      # As we are using a dense retriever we recommend splitting to smaller documents
+      split_by: word
+      split_length: 250
+      split_overlap: 50
+      split_respect_sentence_boundary: True
+
+# Sticking the nodes together to one query pipeline and one indexing pipeline
+pipelines:
+  - name: query
+    nodes:
+      - name: Retriever
+        inputs: [Query]
+      - name: Reader
+        inputs: [Retriever]
+  - name: indexing
+    nodes:
+      - name: FileTypeClassifier
+        inputs: [File]
+      - name: TextFileConverter
+        inputs: [FileTypeClassifier.output_1]
+      - name: PDFConverter
+        inputs: [FileTypeClassifier.output_2]
+      - name: Preprocessor
+        inputs: [TextFileConverter, PDFConverter]
+      - name: Retriever
+        inputs: [Preprocessor]
+      - name: DocumentStore
+        inputs: [Retriever]

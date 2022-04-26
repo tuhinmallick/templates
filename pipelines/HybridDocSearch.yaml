@@ -1,0 +1,68 @@
+# A document search pipeline that combines a dense Retriever (based on embeddings) with a keyword-based Retriever (elasticsearch's BM25)
+version: '1.3.0'
+name: 'HybridDocSearch'
+
+# All nodes that we need for our pipelines
+components:
+  - name: DocumentStore
+    type: DeepsetCloudDocumentStore
+    params: {}
+  # The "keyword-based" Retriever
+  - name: ESRetriever
+    type: ElasticsearchRetriever
+    params:
+      document_store: DocumentStore
+      top_k: 20
+  # The "dense" Retriever
+  - name: EmbeddingRetriever
+    type: EmbeddingRetriever
+    params:
+      document_store: DocumentStore
+      embedding_model: sentence-transformers/multi-qa-mpnet-base-dot-v1
+      model_format: sentence_transformers
+      top_k: 20
+  # A node that joins the results from both Retrievers
+  - name: JoinResults
+    type: JoinDocuments
+    params:
+      join_mode: reciprocal_rank_fusion
+  - name: FileTypeClassifier
+    type: FileTypeClassifier
+  - name: TextFileConverter
+    type: TextConverter
+  - name: PDFConverter
+    type: PDFToTextConverter
+  - name: Preprocessor
+    type: PreProcessor
+    params:
+      # As we are using a dense retriever we recommend splitting to smaller documents
+      split_by: word
+      split_length: 250
+      split_overlap: 30
+      split_respect_sentence_boundary: True
+
+# Sticking the nodes together to one query pipeline and one indexing pipeline
+pipelines:
+  - name: query
+    nodes:
+      - name: ESRetriever
+        inputs: [Query]
+      - name: EmbeddingRetriever
+        inputs: [Query]
+      - name: JoinResults
+        inputs: [ESRetriever, EmbeddingRetriever]
+  - name: indexing
+    nodes:
+      # Depending on the file type we use a Text or PDF converter
+      - name: FileTypeClassifier
+        inputs: [File]
+      - name: TextFileConverter
+        inputs: [FileTypeClassifier.output_1]
+      - name: PDFConverter
+        inputs: [FileTypeClassifier.output_2]
+      - name: Preprocessor
+        inputs: [TextFileConverter, PDFConverter]
+      - name: Retriever
+        inputs: [Preprocessor]
+      - name: DocumentStore
+        inputs: [Retriever]

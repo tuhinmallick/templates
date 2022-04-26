@@ -1,15 +1,25 @@
-# A pipeline for TXT and PDFs simultaneously, retrieval is done only with Elasticsearch
+#A default Question Answering pipeline for English with a good embedding base Retriever and a small, fast Reader model
 version: '1.3.0'
-name: 'Elasticsearch_indexing'
+name: 'QuestionAnswering_en'
 
+# All nodes that we need for our pipelines
 components:
   - name: DocumentStore
     type: DeepsetCloudDocumentStore
+  # A fast retriever that finds the top 20 candidate documents
   - name: Retriever
-    type: ElasticsearchRetriever
+    type: EmbeddingRetriever
     params:
       document_store: DocumentStore
+      embedding_model: sentence-transformers/multi-qa-mpnet-base-dot-v1
+      model_format: sentence_transformers
       top_k: 20
+  # A "Reader" model that goes through those 20 candidate documents and identifies the exact answer
+  - name: Reader
+    type: FARMReader
+    params:
+      model_name_or_path: deepset/roberta-base-squad2-distilled
+      context_window_size: 700
   - name: FileTypeClassifier
     type: FileTypeClassifier
   - name: TextFileConverter
@@ -19,16 +29,20 @@ components:
   - name: Preprocessor
     type: PreProcessor
     params:
+      # As we are using a dense retriever we recommend splitting to smaller documents
       split_by: word
-      split_length: 500
+      split_length: 250
       split_overlap: 50
       split_respect_sentence_boundary: True
 
+# Sticking the nodes together to one query pipeline and one indexing pipeline
 pipelines:
   - name: query
     nodes:
       - name: Retriever
         inputs: [Query]
+      - name: Reader
+        inputs: [Retriever]
   - name: indexing
     nodes:
       - name: FileTypeClassifier
