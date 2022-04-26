@@ -13,7 +13,7 @@ components:
     type: EmbeddingRetriever
     params:
       document_store: DocumentStore
-      embedding_model: sentence-transformers/paraphrase-multilingual-mpnet-base-v2
+      embedding_model: sentence-transformers/msmarco-distilbert-multilingual-en-de-v2-tmp-lng-aligned
       model_format: sentence_transformers
       top_k: 20
   # A "Reader" model that goes through those 20 candidate documents and identifies the exact answer

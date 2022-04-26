@@ -12,6 +12,7 @@ components:
     type: ElasticsearchRetriever
     params:
       document_store: DocumentStore
+      top_k: 20
   # The "dense" Retriever
   - name: EmbeddingRetriever
     type: EmbeddingRetriever
@@ -37,7 +38,7 @@ components:
       # As we are using a dense retriever we recommend splitting to smaller documents
       split_by: word
       split_length: 250
-      split_overlap: 50
+      split_overlap: 30
       split_respect_sentence_boundary: True
 
 # Sticking the nodes together to one query pipeline and one indexing pipeline

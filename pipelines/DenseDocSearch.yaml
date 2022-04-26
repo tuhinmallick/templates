@@ -12,7 +12,6 @@ components:
       document_store: DocumentStore
       embedding_model: sentence-transformers/multi-qa-mpnet-base-dot-v1
       model_format: sentence_transformers
-      pooling_strategy: cls_token
       top_k: 20
   - name: FileTypeClassifier
     type: FileTypeClassifier
@@ -26,7 +25,7 @@ components:
       # As we are using a dense retriever we recommend splitting to smaller documents
       split_by: word
       split_length: 250
-      split_overlap: 50
+      split_overlap: 30
       split_respect_sentence_boundary: True
 
 # Sticking the nodes together to one query pipeline and one indexing pipeline

@@ -24,7 +24,7 @@ components:
       # As we are using a sparse retriever we recommend splitting to slightly longer documents
       split_by: word
       split_length: 500
-      split_overlap: 50
+      split_overlap: 30
       split_respect_sentence_boundary: True
 
 # Sticking the nodes together to one query pipeline and one indexing pipeline

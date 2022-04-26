@@ -13,7 +13,6 @@ components:
       document_store: DocumentStore
       embedding_model: sentence-transformers/multi-qa-mpnet-base-dot-v1
       model_format: sentence_transformers
-      pooling_strategy: cls_token
       top_k: 20
   # A "Reader" model that goes through those 20 candidate documents and identifies the exact answer
   - name: Reader
