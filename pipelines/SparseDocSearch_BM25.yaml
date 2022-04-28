@@ -1,34 +1,35 @@
-# A baseline pipeline for document search that uses a traditional "sparse retriever" (using elasticsearch's BM25 algorithm).
+# A baseline pipeline for document search that uses a traditional, sparse retriever (using Elasticsearch's BM25 algorithm).
 # It relies on matching keywords between query and document and is often a solid baseline to start with
 version: '1.3.0'
 name: 'SparseDocSearch_BM25'
 
-# All nodes that we need for our pipelines
+# This section defines nodes that we want to use in our pipelines
 components:
   - name: DocumentStore
-    type: DeepsetCloudDocumentStore
-  - name: Retriever
-    type: ElasticsearchRetriever
+    type: DeepsetCloudDocumentStore #this is the only supported document store in deepset Cloud
+  - name: Retriever #selects the most relevant documents from the document store
+    type: ElasticsearchRetriever #sparse retriever
     params:
       document_store: DocumentStore
-      top_k: 20
-  - name: FileTypeClassifier
+      top_k: 20 #the number of results to return
+  - name: FileTypeClassifier #routes files based on their extension to appropriate converters, by default txt, pdf, md, docx, html
     type: FileTypeClassifier
-  - name: TextConverter
+  - name: TextConverter #converts files into documents
     type: TextConverter
-  - name: PDFConverter
+  - name: PDFConverter #converts PDFs into documents
     type: PDFToTextConverter
-  - name: Preprocessor
+  - name: Preprocessor #splits documents into smaller ones and cleans them up
     type: PreProcessor
     params:
-      # As we are using a sparse retriever we recommend splitting to slightly longer documents
-      split_by: word
-      split_length: 500
-      split_overlap: 30
-      split_respect_sentence_boundary: True
+      # With a sparse retriever, you can keep slightly longer documents
+      split_by: word #the unit by which you want to split the documents
+      split_length: 500 #the max number of words in a document
+      split_overlap: 30 #enables the sliding window approach
+      split_respect_sentence_boundary: True #retains complete sentences in split documents
 
-# Sticking the nodes together to one query pipeline and one indexing pipeline
-pipelines:
+# Here you define how the nodes are organized in the pipelines
+# For each node, specify its input
+pipelines: 
   - name: query
     nodes:
       - name: Retriever
@@ -38,9 +39,9 @@ pipelines:
       - name: FileTypeClassifier
         inputs: [File]
       - name: TextConverter
-        inputs: [FileTypeClassifier.output_1]
+        inputs: [FileTypeClassifier.output_1] #ensures that this converter gets txt files
       - name: PDFConverter
-        inputs: [FileTypeClassifier.output_2]
+        inputs: [FileTypeClassifier.output_2] #ensures that this converter gets pdf files
       - name: Preprocessor
         inputs: [TextConverter, PDFConverter]
       - name: Retriever

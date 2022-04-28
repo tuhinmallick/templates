@@ -1,41 +1,40 @@
-#A default Question Answering pipeline for English with a good embedding base Retriever and a small, fast Reader model
+#A default Question Answering pipeline for English with a good embedding-based Retriever and a small, fast Reader
 version: '1.3.0'
 name: 'QuestionAnswering_en'
 
-# All nodes that we need for our pipelines
+# This section defines nodes that we want to use in our pipelines
 components:
   - name: DocumentStore
-    type: DeepsetCloudDocumentStore
-  # A fast retriever that finds the top 20 candidate documents
-  - name: Retriever
-    type: EmbeddingRetriever
+    type: DeepsetCloudDocumentStore #the only supported document store in deepset Cloud
+  - name: Retriever #selects the most relevant documents from the document store and passes them on to the Reader
+    type: EmbeddingRetriever #uses a Transformer model to encode the document and the query
     params:
       document_store: DocumentStore
-      embedding_model: sentence-transformers/multi-qa-mpnet-base-dot-v1
+      embedding_model: sentence-transformers/multi-qa-mpnet-base-dot-v1 #model optimized for semantic search
       model_format: sentence_transformers
-      top_k: 20
-  # A "Reader" model that goes through those 20 candidate documents and identifies the exact answer
-  - name: Reader
-    type: FARMReader
+      top_k: 20 #the number of results to return
+  - name: Reader #the component that actually fetches answers from among the 20 documents returned by retriever 
+    type: FARMReader #Transformer-based reader, specializes in extractive QA
     params:
-      model_name_or_path: deepset/roberta-base-squad2-distilled
-      context_window_size: 700
-  - name: FileTypeClassifier
+      model_name_or_path: deepset/roberta-base-squad2-distilled #an optimized variant of BERT, a strong all-round model
+      context_window_size: 700 #the size of the window around the answer span
+  - name: FileTypeClassifier #routes files based on their extension to appropriate converters, by default txt, pdf, md, docx, html
     type: FileTypeClassifier
-  - name: TextConverter
+  - name: TextConverter #converts files into documents
     type: TextConverter
-  - name: PDFConverter
+  - name: PDFConverter #converts PDFs into documents
     type: PDFToTextConverter
-  - name: Preprocessor
+  - name: Preprocessor #splits documents into smaller ones and cleans them up
     type: PreProcessor
     params:
-      # As we are using a dense retriever we recommend splitting to smaller documents
-      split_by: word
-      split_length: 250
-      split_overlap: 50
-      split_respect_sentence_boundary: True
+      #With a dense retriever, it's good to split your documents into smaller ones
+      split_by: word #the unit by which you want to split the documents
+      split_length: 250 #the max number of words in a document
+      split_overlap: 50 #enables the sliding window approach
+      split_respect_sentence_boundary: True #retains complete sentences in split documents
 
-# Sticking the nodes together to one query pipeline and one indexing pipeline
+# Here you define how the nodes are organized in the pipelines
+# For each node, specify its input
 pipelines:
   - name: query
     nodes:
@@ -45,12 +44,13 @@ pipelines:
         inputs: [Retriever]
   - name: indexing
     nodes:
+    # Depending on the file type, we use a Text or PDF converter
       - name: FileTypeClassifier
         inputs: [File]
       - name: TextConverter
-        inputs: [FileTypeClassifier.output_1]
+        inputs: [FileTypeClassifier.output_1] #ensures that this converter receives txt files
       - name: PDFConverter
-        inputs: [FileTypeClassifier.output_2]
+        inputs: [FileTypeClassifier.output_2] #ensures that this converter receives PDFs
       - name: Preprocessor
         inputs: [TextConverter, PDFConverter]
       - name: Retriever
