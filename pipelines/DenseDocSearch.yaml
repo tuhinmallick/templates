@@ -7,7 +7,7 @@ components:
   - name: DocumentStore
     type: DeepsetCloudDocumentStore #the only supported document store in deepset Cloud
   - name: Retriever #selects the most relevant documents from the document store
-    type: EmbeddingRetriever #uses a Transformer model to encode the document and the query
+    type: EmbeddingRetriever #uses one Transformer model to encode the document and the query
     params:
       document_store: DocumentStore
       embedding_model: sentence-transformers/multi-qa-mpnet-base-dot-v1 #model optimized for semantic search
