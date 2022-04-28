@@ -7,7 +7,7 @@ components:
   - name: DocumentStore
     type: DeepsetCloudDocumentStore #the only supported document store in deepset Cloud
     params:
-      similarity: cosine #recommended for BERT models
+      similarity: cosine #recommended for sentence transformer models
   - name: Retriever #selects the most relevant documents from the document store and then passes them on to the Reader
     type: EmbeddingRetriever #uses a Transformer model to encode the document and the query
     params:

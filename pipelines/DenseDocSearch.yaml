@@ -15,7 +15,7 @@ components:
       top_k: 20 #the number of results to return
   - name: FileTypeClassifier #routes files based on their extension to appropriate converters
     type: FileTypeClassifier
-  - name: TextConverter #converts files into documents
+  - name: TextConverter #converts .txt files into documents
     type: TextConverter
   - name: PDFConverter #converts PDFs into documents
     type: PDFToTextConverter
