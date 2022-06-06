@@ -4,7 +4,7 @@
 # It also suggest the models that you can use. Just type your Hugging Face organization and forward slash (/) to see available models.
 
 # This is a default document search pipeline with a good embedding-based Retriever
-version: '1.3.0'
+version: '1.4.0'
 name: 'DenseDocSearch'
 
 # This section defines nodes that you want to use in your pipelines. Each node must have a name and a type. You can also set the node's parameters here.
