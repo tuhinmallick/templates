@@ -1,31 +1,37 @@
+# If you need help with the YAML format, have a look at https://docs.cloud.deepset.ai/docs/create-a-pipeline-using-a-yaml-file.
+# This is a friendly editor that helps you create your pipelines with autosuggestions. To use them, press control + space on your keyboard.
+# It also suggest the models that you can use. Just type your Hugging Face organization and forward slash (/) to see available models.
+
 # A baseline pipeline for document search that uses a traditional, sparse retriever (using Elasticsearch's BM25 algorithm).
 # It relies on matching keywords between query and document and is often a solid baseline to start with
 version: '1.4.0'
 name: 'SparseDocSearch_BM25'
 
-# This section defines nodes that we want to use in our pipelines
+# This section defines nodes that you want to use in your pipelines. Each node must have a name and a type. You can also set the node's parameters here.
+# The name is up to you, you can give your component a friendly name. You then use components' names when specifying their order in the pipeline.
+# Type is the class name of the component. 
 components:
   - name: DocumentStore
-    type: DeepsetCloudDocumentStore #this is the only supported document store in deepset Cloud
-  - name: Retriever #selects the most relevant documents from the document store
-    type: ElasticsearchRetriever #sparse retriever
+    type: DeepsetCloudDocumentStore # This is the only supported document store in deepset Cloud
+  - name: Retriever # Selects the most relevant documents from the document store
+    type: ElasticsearchRetriever # Sparse retriever
     params:
       document_store: DocumentStore
-      top_k: 20 #the number of results to return
-  - name: FileTypeClassifier #routes files based on their extension to appropriate converters, by default txt, pdf, md, docx, html
+      top_k: 20 # The number of results to return
+  - name: FileTypeClassifier # Routes files based on their extension to appropriate converters, by default txt, pdf, md, docx, html
     type: FileTypeClassifier
-  - name: TextConverter #converts files into documents
+  - name: TextConverter # Converts files into documents
     type: TextConverter
-  - name: PDFConverter #converts PDFs into documents
+  - name: PDFConverter # Converts PDFs into documents
     type: PDFToTextConverter
-  - name: Preprocessor #splits documents into smaller ones and cleans them up
+  - name: Preprocessor # Splits documents into smaller ones and cleans them up
     type: PreProcessor
     params:
       # With a sparse retriever, you can keep slightly longer documents
-      split_by: word #the unit by which you want to split the documents
-      split_length: 500 #the max number of words in a document
-      split_overlap: 30 #enables the sliding window approach
-      split_respect_sentence_boundary: True #retains complete sentences in split documents
+      split_by: word # The unit by which you want to split the documents
+      split_length: 500 # The max number of words in a document
+      split_overlap: 30 # Enables the sliding window approach
+      split_respect_sentence_boundary: True # Retains complete sentences in split documents
 
 # Here you define how the nodes are organized in the pipelines
 # For each node, specify its input
@@ -39,9 +45,9 @@ pipelines:
       - name: FileTypeClassifier
         inputs: [File]
       - name: TextConverter
-        inputs: [FileTypeClassifier.output_1] #ensures that this converter gets txt files
+        inputs: [FileTypeClassifier.output_1] # Ensures that this converter gets txt files
       - name: PDFConverter
-        inputs: [FileTypeClassifier.output_2] #ensures that this converter gets pdf files
+        inputs: [FileTypeClassifier.output_2] # Ensures that this converter gets pdf files
       - name: Preprocessor
         inputs: [TextConverter, PDFConverter]
       - name: Retriever

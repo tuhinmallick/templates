@@ -1,32 +1,39 @@
-# A default document search pipeline with a good embedding-based Retriever
-version: '1.4.0'
+
+# If you need help with the YAML format, have a look at https://docs.cloud.deepset.ai/docs/create-a-pipeline-using-a-yaml-file.
+# This is a friendly editor that helps you create your pipelines with autosuggestions. To use them, press control + space on your keyboard.
+# It also suggest the models that you can use. Just type your Hugging Face organization and forward slash (/) to see available models.
+
+# This is a default document search pipeline with a good embedding-based Retriever
+version: '1.3.0'
 name: 'DenseDocSearch'
 
-# This section defines nodes that we want to use in our pipelines
+# This section defines nodes that you want to use in your pipelines. Each node must have a name and a type. You can also set the node's parameters here.
+# The name is up to you, you can give your component a friendly name. You then use components' names when specifying their order in the pipeline.
+# Type is the class name of the component. 
 components:
   - name: DocumentStore
-    type: DeepsetCloudDocumentStore #the only supported document store in deepset Cloud
-  - name: Retriever #selects the most relevant documents from the document store
-    type: EmbeddingRetriever #uses one Transformer model to encode the document and the query
+    type: DeepsetCloudDocumentStore # The only supported document store in deepset Cloud
+  - name: Retriever # Selects the most relevant documents from the document store
+    type: EmbeddingRetriever # Uses one Transformer model to encode the document and the query
     params:
       document_store: DocumentStore
-      embedding_model: sentence-transformers/multi-qa-mpnet-base-dot-v1 #model optimized for semantic search
-      model_format: sentence_transformers
-      top_k: 20 #the number of results to return
-  - name: FileTypeClassifier #routes files based on their extension to appropriate converters
+      embedding_model: sentence-transformers/multi-qa-mpnet-base-dot-v1 # Model optimized for semantic search
+      model_format: sentence_transformersThis 
+      top_k: 20 # The number of results to return
+  - name: FileTypeClassifier # Routes files based on their extension to appropriate converters
     type: FileTypeClassifier
-  - name: TextConverter #converts .txt files into documents
+  - name: TextConverter # Converts .txt files into documents
     type: TextConverter
-  - name: PDFConverter #converts PDFs into documents
+  - name: PDFConverter # Converts PDFs into documents
     type: PDFToTextConverter
-  - name: Preprocessor #splits documents into smaller ones and cleans them up
+  - name: Preprocessor # Splits documents into smaller ones and cleans them up
     type: PreProcessor
     params:
-      #With a dense retriever, it's good to split your documents into smaller ones
-      split_by: word #the unit by which you want to split the documents
-      split_length: 250 #the max number of words in a document
-      split_overlap: 30 #enables the sliding window approach
-      split_respect_sentence_boundary: True #retains complete sentences in split documents
+      # With a dense retriever, it's good to split your documents into smaller ones
+      split_by: word # The unit by which you want to split the documents
+      split_length: 250 # The max number of words in a document
+      split_overlap: 30 # Enables the sliding window approach
+      split_respect_sentence_boundary: True # Retains complete sentences in split documents
 
 # Here you define how the nodes are organized in the pipelines
 # For each node, specify its input
