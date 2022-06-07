@@ -1,6 +1,6 @@
 # If you need help with the YAML format, have a look at https://docs.cloud.deepset.ai/docs/create-a-pipeline-using-a-yaml-file.
 # This is a friendly editor that helps you create your pipelines with autosuggestions. To use them, press control + space on your keyboard.
-# This editor can also suggest the available models if you're specifying `model_name_or_path` or `embedding_model`. Just type your Hugging Face organization and a forward slash (/) to see available models.
+# Whenever you need to specify a model, this editor helps you out as well. Just type your Hugging Face organization and a forward slash (/) to see available models.
 
 
 # This is a default Question Answering pipeline for German with a dense, multilingual EmbeddingRetriever and a German QA model
