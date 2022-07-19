@@ -18,7 +18,7 @@ components:
     params:
       document_store: DocumentStore
       embedding_model: sentence-transformers/multi-qa-mpnet-base-dot-v1 # Model optimized for semantic search
-      model_format: sentence_transformersThis 
+      model_format: sentence_transformers 
       top_k: 20 # The number of results to return
   - name: FileTypeClassifier # Routes files based on their extension to appropriate converters
     type: FileTypeClassifier
