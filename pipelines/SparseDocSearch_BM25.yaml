@@ -5,7 +5,7 @@
 
 # A baseline pipeline for document search that uses a traditional, sparse retriever (using Elasticsearch's BM25 algorithm).
 # It relies on matching keywords between query and document and is often a solid baseline to start with
-version: '1.5.0'
+version: '1.6.0'
 name: 'SparseDocSearch_BM25'
 
 # This section defines nodes that you want to use in your pipelines. Each node must have a name and a type. You can also set the node's parameters here.
