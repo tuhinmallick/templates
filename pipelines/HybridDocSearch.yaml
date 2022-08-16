@@ -4,7 +4,7 @@
 
 
 # This is a document search pipeline that combines a dense (embedding-based) Retriever with a keyword-based Retriever (Elasticsearch's BM25)
-version: '1.6.0'
+version: '1.7.0'
 name: 'HybridDocSearch'
 
 # This section defines nodes that you want to use in your pipelines. Each node must have a name and a type. You can also set the node's parameters here.
