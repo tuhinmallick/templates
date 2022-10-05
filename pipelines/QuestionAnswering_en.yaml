@@ -4,7 +4,7 @@
 
 
 # This is default Question Answering pipeline for English with a good embedding-based Retriever and a small, fast Reader
-version: '1.7.0'
+version: '1.8.0'
 name: 'QuestionAnswering_en'
 
 # This section defines nodes that you want to use in your pipelines. Each node must have a name and a type. You can also set the node's parameters here.
@@ -39,6 +39,7 @@ components:
       split_length: 250 # The max number of words in a document
       split_overlap: 50 # Enables the sliding window approach
       split_respect_sentence_boundary: True # Retains complete sentences in split documents
+      language: en # Used by NLTK to best detect the sentence boundaries for that language
 
 # Here you define how the nodes are organized in the pipelines
 # For each node, specify its input
