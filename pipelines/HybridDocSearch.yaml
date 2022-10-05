@@ -13,8 +13,8 @@ name: 'HybridDocSearch'
 components:
   - name: DocumentStore
     type: DeepsetCloudDocumentStore # The only supported document store in deepset Cloud
-  - name: ESRetriever # The keyword-based retriever
-    type: ElasticsearchRetriever
+  - name: BM25Retriever # The keyword-based retriever
+    type: BM25Retriever
     params:
       document_store: DocumentStore
       top_k: 20 # The number of results to return
