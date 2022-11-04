@@ -1,10 +1,10 @@
-# If you need help with the YAML format, have a look at https://docs.cloud.deepset.ai/docs/create-a-pipeline-using-a-yaml-file.
+# If you need help with the YAML format, have a look at https://docs.cloud.deepset.ai/docs/create-a-pipeline#create-a-pipeline-using-yaml.
 # This is a friendly editor that helps you create your pipelines with autosuggestions. To use them, press control + space on your keyboard.
 # Whenever you need to specify a model, this editor helps you out as well. Just type your Hugging Face organization and a forward slash (/) to see available models.
 
 
 # This is a document search pipeline that combines a dense (embedding-based) Retriever with a keyword-based Retriever (Elasticsearch's BM25)
-version: '1.8.0'
+version: '1.10.0'
 name: 'HybridDocSearch'
 
 # This section defines nodes that you want to use in your pipelines. Each node must have a name and a type. You can also set the node's parameters here.
@@ -13,8 +13,8 @@ name: 'HybridDocSearch'
 components:
   - name: DocumentStore
     type: DeepsetCloudDocumentStore # The only supported document store in deepset Cloud
-  - name: ESRetriever # The keyword-based retriever
-    type: ElasticsearchRetriever
+  - name: BM25Retriever # The keyword-based retriever
+    type: BM25Retriever
     params:
       document_store: DocumentStore
       top_k: 20 # The number of results to return
