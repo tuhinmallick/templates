@@ -14,7 +14,7 @@ components:
   - name: DocumentStore
     type: DeepsetCloudDocumentStore # This is the only supported document store in deepset Cloud
   - name: Retriever # Selects the most relevant documents from the document store
-    type: BM25Retriever # Sparse retriever
+    type: BM25Retriever # The keyword-based retriever
     params:
       document_store: DocumentStore
       top_k: 20 # The number of results to return
