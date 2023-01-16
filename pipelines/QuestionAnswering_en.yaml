@@ -1,10 +1,9 @@
-# If you need help with the YAML format, have a look at https://docs.cloud.deepset.ai/docs/create-a-pipeline-using-a-yaml-file.
-# This is a friendly editor that helps you create your pipelines with autosuggestions. To use them, press control + space on your keyboard.
+# If you need help with the YAML format, have a look at https://docs.cloud.deepset.ai/docs/create-a-pipeline#create-a-pipeline-using-yaml.
+# This is a friendly editor that helps you create your pipelines with autosuggestions. To use them, press Control + Space on your keyboard.
 # Whenever you need to specify a model, this editor helps you out as well. Just type your Hugging Face organization and a forward slash (/) to see available models.
 
-
-# This is default Question Answering pipeline for English with a good embedding-based Retriever and a small, fast Reader
-version: '1.8.0'
+# This is baseline Question Answering pipeline for English that searches for answers based on semantic similarity between the question and the answer. It has a good, vector-based Retriever and a small, fast Reader.
+version: 1.12.2
 name: 'QuestionAnswering_en'
 
 # This section defines nodes that you want to use in your pipelines. Each node must have a name and a type. You can also set the node's parameters here.
