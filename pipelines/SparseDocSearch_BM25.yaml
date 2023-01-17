@@ -24,7 +24,7 @@ components:
     type: TextConverter
   - name: PDFConverter # Converts PDFs into documents
     type: PDFToTextConverter
-  - name: Preprocessor # Splits documents into smaller ones and cleans them up
+  - name: Preprocessor # Splits files into smaller documents and cleans them up
     type: PreProcessor
     params:
       # With a keyword-based retriever, you can keep slightly longer documents
@@ -46,9 +46,9 @@ pipelines:
       - name: FileTypeClassifier
         inputs: [File]
       - name: TextConverter
-        inputs: [FileTypeClassifier.output_1] # Ensures that this converter gets txt files
+        inputs: [FileTypeClassifier.output_1] # Ensures this converter gets TXT files
       - name: PDFConverter
-        inputs: [FileTypeClassifier.output_2] # Ensures that this converter gets pdf files
+        inputs: [FileTypeClassifier.output_2] # Ensures this converter gets PDF files
       - name: Preprocessor
         inputs: [TextConverter, PDFConverter]
       - name: Retriever

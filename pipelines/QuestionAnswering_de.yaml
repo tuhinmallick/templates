@@ -1,5 +1,5 @@
 # If you need help with the YAML format, have a look at https://docs.cloud.deepset.ai/docs/create-a-pipeline#create-a-pipeline-using-yaml.
-# This is a friendly editor that helps you create your pipelines with autosuggestions. To use them, press control + space on your keyboard.
+# This is a friendly editor that helps you create your pipelines with autosuggestions. To use them, press Control + Space on your keyboard.
 # Whenever you need to specify a model, this editor helps you out as well. Just type your Hugging Face organization and a forward slash (/) to see available models.
 
 # This is a baseline Question Answering pipeline for German. It uses a vector-based search and a German QA model.
@@ -33,10 +33,10 @@ components:
     type: TextConverter
   - name: PDFConverter # Converts PDFs into documents
     type: PDFToTextConverter
-  - name: Preprocessor # Splits documents into smaller ones and cleans them up
+  - name: Preprocessor # Splits files into smaller documents and cleans them up
     type: PreProcessor
     params:
-      # With a vector-based (dense) retriever, it's good to split your documents into smaller ones
+      # With a vector-based (dense) retriever, it's good to split your files into smaller documents
       split_by: word # The unit by which you want to split the documents
       split_length: 250 # The max number of words in a document
       split_overlap: 30 # Enables the sliding window approach
