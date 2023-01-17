@@ -2,7 +2,7 @@
 # This is a friendly editor that helps you create your pipelines with autosuggestions. To use them, press control + space on your keyboard.
 # Whenever you need to specify a model, this editor helps you out as well. Just type your Hugging Face organization and a forward slash (/) to see available models.
 
-# This is a baseline Question Answering pipeline for German. It searches for answers based on their semantic similarity with the question. It uses a vector-based search and a German QA model.
+# This is a baseline Question Answering pipeline for German. It uses a vector-based search and a German QA model.
 version: 1.12.2
 name: 'QuestionAnswering_de'
 
@@ -57,7 +57,7 @@ pipelines:
       - name: FileTypeClassifier
         inputs: [File]
       - name: TextConverter
-        inputs: [FileTypeClassifier.output_1] # Ensures this converter receives txt files
+        inputs: [FileTypeClassifier.output_1] # Ensures this converter receives TXT files
       - name: PDFConverter
         inputs: [FileTypeClassifier.output_2] # Ensures this converter receives PDFs
       - name: Preprocessor

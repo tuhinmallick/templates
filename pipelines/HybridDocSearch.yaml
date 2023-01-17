@@ -61,9 +61,9 @@ pipelines:
       - name: FileTypeClassifier
         inputs: [File]
       - name: TextConverter
-        inputs: [FileTypeClassifier.output_1] #ensures that this converter gets txt files
+        inputs: [FileTypeClassifier.output_1] # Ensures this converter gets TXT files
       - name: PDFConverter
-        inputs: [FileTypeClassifier.output_2] #ensures that this converter gets pdf files
+        inputs: [FileTypeClassifier.output_2] # Ensures this converter gets PDF files
       - name: Preprocessor
         inputs: [TextConverter, PDFConverter]
       - name: EmbeddingRetriever

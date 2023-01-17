@@ -21,7 +21,7 @@ components:
       top_k: 20 # The number of results to return
   - name: FileTypeClassifier # Routes files based on their extension to appropriate converters
     type: FileTypeClassifier
-  - name: TextConverter # Converts .txt files into documents
+  - name: TextConverter # Converts TXT files into documents
     type: TextConverter
   - name: PDFConverter # Converts PDFs into documents
     type: PDFToTextConverter
@@ -48,9 +48,9 @@ pipelines:
       - name: FileTypeClassifier
         inputs: [File]
       - name: TextConverter
-        inputs: [FileTypeClassifier.output_1] #ensures that this converter receives txt files
+        inputs: [FileTypeClassifier.output_1] # Ensures this converter receives TXT files
       - name: PDFConverter
-        inputs: [FileTypeClassifier.output_2] #ensures that this converter receives PDFs
+        inputs: [FileTypeClassifier.output_2] # Ensures this converter receives PDFs
       - name: Preprocessor
         inputs: [TextConverter, PDFConverter]
       - name: Retriever
