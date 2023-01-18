@@ -34,10 +34,10 @@ components:
     type: TextConverter
   - name: PDFConverter # Converts PDFs into documents
     type: PDFToTextConverter
-  - name: Preprocessor # Splits files into smaller documents and cleans them up
+  - name: Preprocessor # Splits documents into smaller ones and cleans them up
     type: PreProcessor
     params:
-      # With a vector-based retriever, it's good to split your files into smaller documents
+      # With a vector-based retriever, it's good to split your documents into smaller ones
       split_by: word # The unit by which you want to split the documents
       split_length: 250 # The max number of words in a document
       split_overlap: 30 # Enables the sliding window approach
