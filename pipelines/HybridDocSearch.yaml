@@ -1,11 +1,10 @@
 # If you need help with the YAML format, have a look at https://docs.cloud.deepset.ai/docs/create-a-pipeline#create-a-pipeline-using-yaml.
-# This is a friendly editor that helps you create your pipelines with autosuggestions. To use them, press control + space on your keyboard.
+# This is a friendly editor that helps you create your pipelines with autosuggestions. To use them, press Control + Space on your keyboard.
 # Whenever you need to specify a model, this editor helps you out as well. Just type your Hugging Face organization and a forward slash (/) to see available models.
 
-
-# This is a document search pipeline that combines a dense (embedding-based) Retriever with a keyword-based Retriever (Elasticsearch's BM25)
-version: '1.10.0'
-name: 'HybridDocSearch'
+# This is a document search pipeline that combines vector-based and keyword-based searches. Such combination usually yields the best results without any training. 
+version: 1.12.2
+name: 'HybridDocumentSearch'
 
 # This section defines nodes that you want to use in your pipelines. Each node must have a name and a type. You can also set the node's parameters here.
 # The name is up to you, you can give your component a friendly name. You then use components' names when specifying their order in the pipeline.
@@ -18,7 +17,7 @@ components:
     params:
       document_store: DocumentStore
       top_k: 20 # The number of results to return
-  - name: EmbeddingRetriever # The dense retriever
+  - name: EmbeddingRetriever # The vector-based retriever
     type: EmbeddingRetriever
     params:
       document_store: DocumentStore
@@ -38,7 +37,7 @@ components:
   - name: Preprocessor # Splits documents into smaller ones and cleans them up
     type: PreProcessor
     params:
-      # With a dense retriever, it's good to split your documents into smaller ones
+      # With a vector-based retriever, it's good to split your documents into smaller ones
       split_by: word # The unit by which you want to split the documents
       split_length: 250 # The max number of words in a document
       split_overlap: 30 # Enables the sliding window approach
@@ -50,21 +49,21 @@ components:
 pipelines:
   - name: query
     nodes:
-      - name: ESRetriever
+      - name: BM25Retriever
         inputs: [Query]
       - name: EmbeddingRetriever
         inputs: [Query]
       - name: JoinResults
-        inputs: [ESRetriever, EmbeddingRetriever]
+        inputs: [BM25Retriever, EmbeddingRetriever]
   - name: indexing
     nodes:
       # Depending on the file type, we use a Text or PDF converter
       - name: FileTypeClassifier
         inputs: [File]
       - name: TextConverter
-        inputs: [FileTypeClassifier.output_1] #ensures that this converter gets txt files
+        inputs: [FileTypeClassifier.output_1] # Ensures this converter gets TXT files
       - name: PDFConverter
-        inputs: [FileTypeClassifier.output_2] #ensures that this converter gets pdf files
+        inputs: [FileTypeClassifier.output_2] # Ensures this converter gets PDF files
       - name: Preprocessor
         inputs: [TextConverter, PDFConverter]
       - name: EmbeddingRetriever

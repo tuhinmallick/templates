@@ -1,12 +1,11 @@
 # If you need help with the YAML format, have a look at https://docs.cloud.deepset.ai/docs/create-a-pipeline#create-a-pipeline-using-yaml.
-# This is a friendly editor that helps you create your pipelines with autosuggestions. To use them, press control + space on your keyboard.
+# This is a friendly editor that helps you create your pipelines with autosuggestions. To use them, press Control + Space on your keyboard.
 # Whenever you need to specify a model, this editor helps you out as well. Just type your Hugging Face organization and a forward slash (/) to see available models.
 
-
-# A baseline pipeline for document search that uses a traditional, sparse retriever (using Elasticsearch's BM25 algorithm).
-# It relies on matching keywords between query and document and is often a solid baseline to start with
-version: '1.10.0'
-name: 'SparseDocSearch_BM25'
+# A pipeline for document search that uses a traditional, keyword-based retriever (using Elasticsearch's BM25 algorithm).
+# It relies on matching keywords between query and document and is often a solid baseline to start with.
+version: 1.12.2
+name: 'KeywordDocumentSearch'
 
 # This section defines nodes that you want to use in your pipelines. Each node must have a name and a type. You can also set the node's parameters here.
 # The name is up to you, you can give your component a friendly name. You then use components' names when specifying their order in the pipeline.
@@ -15,7 +14,7 @@ components:
   - name: DocumentStore
     type: DeepsetCloudDocumentStore # This is the only supported document store in deepset Cloud
   - name: Retriever # Selects the most relevant documents from the document store
-    type: BM25Retriever # Sparse retriever
+    type: BM25Retriever # The keyword-based retriever
     params:
       document_store: DocumentStore
       top_k: 20 # The number of results to return
@@ -25,10 +24,10 @@ components:
     type: TextConverter
   - name: PDFConverter # Converts PDFs into documents
     type: PDFToTextConverter
-  - name: Preprocessor # Splits documents into smaller ones and cleans them up
+  - name: Preprocessor # Splits files into smaller documents and cleans them up
     type: PreProcessor
     params:
-      # With a sparse retriever, you can keep slightly longer documents
+      # With a keyword-based retriever, you can keep slightly longer documents
       split_by: word # The unit by which you want to split the documents
       split_length: 500 # The max number of words in a document
       split_overlap: 30 # Enables the sliding window approach
@@ -47,9 +46,9 @@ pipelines:
       - name: FileTypeClassifier
         inputs: [File]
       - name: TextConverter
-        inputs: [FileTypeClassifier.output_1] # Ensures that this converter gets txt files
+        inputs: [FileTypeClassifier.output_1] # Ensures this converter gets TXT files
       - name: PDFConverter
-        inputs: [FileTypeClassifier.output_2] # Ensures that this converter gets pdf files
+        inputs: [FileTypeClassifier.output_2] # Ensures this converter gets PDF files
       - name: Preprocessor
         inputs: [TextConverter, PDFConverter]
       - name: Retriever
