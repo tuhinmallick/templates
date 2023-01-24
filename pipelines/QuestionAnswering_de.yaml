@@ -2,6 +2,7 @@
 # This is a friendly editor that helps you create your pipelines with autosuggestions. To use them, press Control + Space on your keyboard.
 # Whenever you need to specify a model, this editor helps you out as well. Just type your Hugging Face organization and a forward slash (/) to see available models.
 
+
 # This is a baseline Question Answering pipeline for German. It uses a vector-based search and a German QA model.
 version: 1.12.2
 name: 'QuestionAnswering_de'
@@ -18,8 +19,9 @@ components:
     type: EmbeddingRetriever # Uses a Transformer model to encode the document and the query
     params:
       document_store: DocumentStore
-      embedding_model: sentence-transformers/msmarco-distilbert-multilingual-en-de-v2-tmp-lng-aligned
+      embedding_model: sentence-transformers/paraphrase-multilingual-mpnet-base-v2
       model_format: sentence_transformers
+      scale_score: false
       top_k: 20 # The number of results to return
   # A "Reader" model that goes through those 20 candidate documents and identifies the exact answer
   - name: Reader # The component that actually fetches answers from the 20 documents returned by retriever    
