@@ -14,7 +14,7 @@ components:
   - name: DocumentStore
     type: DeepsetCloudDocumentStore # The only supported document store in deepset Cloud
     params:
-      similarity: cosine # Recommended for sentence transformer models
+      similarity: cosine # Recommended similarity for paraphrase-multilingual-mpnet-base-v2
   - name: Retriever # Selects the most relevant documents from the document store and then passes them on to the Reader
     type: EmbeddingRetriever # Uses a Transformer model to encode the document and the query
     params:
