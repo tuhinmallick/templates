@@ -3,7 +3,7 @@
 # Whenever you need to specify a model, this editor helps you out as well. Just type your Hugging Face organization and a forward slash (/) to see available models.
 
 # This is the default Generative Question Answering pipeline for English with a good embedding-based Retriever and OpenAI's GPT-3 model as a Generator
-version: '1.10.0'
+version: '1.13.1'
 name: 'GenerativeQA'
 
 # This section defines nodes that you want to use in your pipelines. Each node must have a name and a type. You can also set the node's parameters here.
