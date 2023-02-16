@@ -21,7 +21,7 @@ components:
     type: PromptNode # Transformer-based reader, specializes in extractive QA
     params:
       default_prompt_template: question-answering # An optimized variant of BERT, a strong all-round model
-      model_name_or_path: google/flan-t5-base
+      model_name_or_path: google/flan-t5-large
   - name: InputDocumentShaper
     type: Shaper
     params:

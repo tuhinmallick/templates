@@ -22,10 +22,9 @@ components:
   - name: AnswerGen # Generates the actual answer based on the documents it gets from the retriever
     type: OpenAIAnswerGenerator 
     params:
-      api_key: <API Token>
       model: text-davinci-003
       max_tokens: 200
-      temperature: 0.2
+      temperature: 0.8
       frequency_penalty: 0.1
       presence_penalty: 0.1
   - name: FileTypeClassifier # Routes files based on their extension to appropriate converters, by default txt, pdf, md, docx, html
