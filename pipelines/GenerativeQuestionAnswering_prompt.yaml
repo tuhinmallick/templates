@@ -16,7 +16,7 @@ components:
     type: BM25Retriever # Uses a Transformer model to encode the document and the query
     params:
       document_store: DocumentStore
-      top_k: 10 # The number of results to return
+      top_k: 3 # The number of results to return
   - name: PromptNode # The component that actually fetches answers from among the 20 documents returned by retriever 
     type: PromptNode # Transformer-based reader, specializes in extractive QA
     params:

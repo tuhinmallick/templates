@@ -27,6 +27,7 @@ components:
       temperature: 0.8
       frequency_penalty: 0.1
       presence_penalty: 0.1
+      top_k: 3 # The number of results to return
   - name: FileTypeClassifier # Routes files based on their extension to appropriate converters, by default txt, pdf, md, docx, html
     type: FileTypeClassifier
   - name: TextConverter # Converts files into documents
