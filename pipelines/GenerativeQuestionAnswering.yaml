@@ -19,12 +19,12 @@ components:
       embedding_model: sentence-transformers/multi-qa-mpnet-base-dot-v1 # Model optimized for semantic search 
       model_format: sentence_transformers
       top_k: 3 # The number of documents to return
-  - name: AnswerGen # Generates the actual answer based on the documents it gets from the retriever
+  - name: AnswerGen # Generates candidate answers based on the documents it gets from the retriever
     type: OpenAIAnswerGenerator 
     params:
       model: text-davinci-003
-      max_tokens: 200 #  The maximum number of tokens allowed for the generated Answer.
-      temperature: 0.8 # Specifies the certainty of the teacher model, higher values mean the model will take more risks
+      max_tokens: 200 # The maximum number of tokens allowed for each generated Answer.
+      temperature: 0.8 # Determines the randomness of the model. Higher values mean the model will take more risks
       frequency_penalty: 0.1 # Positive values penalize new tokens based on their existing frequency in the text so far.
       presence_penalty: 0.1 #  Positive values penalize new tokens based on whether they have already appeared in the text.
       top_k: 3 # The number of results to return

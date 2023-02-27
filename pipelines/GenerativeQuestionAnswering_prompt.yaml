@@ -16,7 +16,7 @@ components:
     type: BM25Retriever # Uses a Transformer model to encode the document and the query
     params:
       document_store: DocumentStore
-      top_k: 10 # The number of results to return
+      top_k: 2 # The number of results to return
   - name: PromptNode # The component that generates the answer based on the documents it gets from the retriever 
     type: PromptNode 
     params:
