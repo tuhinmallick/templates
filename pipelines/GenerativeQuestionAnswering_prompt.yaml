@@ -3,7 +3,7 @@
 # Whenever you need to specify a model, this editor helps you out as well. Just type your Hugging Face organization and a forward slash (/) to see available models.
 
 # This is the Generative Question Answering pipeline for English with a good vector-based Retriever and Google's FLAN-T5 model.
-version: '1.13.1'
+version: '1.14.0'
 name: 'GenerativeQA_promptnode'
 
 # This section defines the nodes you want to use in your pipelines. Each node must have a name and a type. You can also set the node's parameters here.
@@ -12,16 +12,19 @@ name: 'GenerativeQA_promptnode'
 components:
   - name: DocumentStore
     type: DeepsetCloudDocumentStore # The only supported document store in deepset Cloud
-  - name: Retriever # Selects the most relevant documents from the document store and passes them on to the PromptNode
-    type: BM25Retriever # Uses a Transformer model to encode the document and the query
+  - name: Retriever # Selects the most relevant documents from the document store so that the OpenAI model can base it's generation on it. 
+    type: EmbeddingRetriever # Uses a Transformer model to encode the document and the query
     params:
       document_store: DocumentStore
-      top_k: 1 # The number of results to return
+      embedding_model: sentence-transformers/multi-qa-mpnet-base-dot-v1 # Model optimized for semantic search 
+      model_format: sentence_transformers
+      top_k: 3 # The number of documents to return
   - name: PromptNode # The component that generates the answer based on the documents it gets from the retriever 
-    type: PromptNode 
+    type: PromptNode
     params:
       default_prompt_template: question-answering # PromptTemplate defines the task you want the PromptNode to do. Here, we want it to generate an answer to our question
-      model_name_or_path: google/flan-t5-large # A default large language model for PromptNode
+      model_name_or_path:  google/flan-t5-large # A default large language model for PromptNode
+      top_k: 3 # The number of answers to generate
   - name: InputDocumentShaper # This Shaper node combines all documents from the retriever into one so that the model can generate an answer based on all documents
     type: Shaper
     params:
