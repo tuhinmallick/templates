@@ -2,50 +2,50 @@
 # This is a friendly editor that helps you create your pipelines with autosuggestions. To use them, press Control + Space on your keyboard.
 # Whenever you need to specify a model, this editor helps you out as well. Just type your Hugging Face organization and a forward slash (/) to see available models.
 
-# This is the Generative Question Answering pipeline for English with a good embedding-based Retriever and Google's Flan-T5 model
+# This is the Generative Question Answering pipeline for English with a good vector-based Retriever and Google's FLAN-T5 model.
 version: '1.13.1'
 name: 'GenerativeQA_promptnode'
 
-# This section defines nodes that you want to use in your pipelines. Each node must have a name and a type. You can also set the node's parameters here.
+# This section defines the nodes you want to use in your pipelines. Each node must have a name and a type. You can also set the node's parameters here.
 # The name is up to you, you can give your component a friendly name. You then use components' names when specifying their order in the pipeline.
 # Type is the class name of the component. 
 components:
   - name: DocumentStore
     type: DeepsetCloudDocumentStore # The only supported document store in deepset Cloud
-  - name: Retriever # Selects the most relevant documents from the document store and passes them on to the Reader
+  - name: Retriever # Selects the most relevant documents from the document store and passes them on to the PromptNode
     type: BM25Retriever # Uses a Transformer model to encode the document and the query
     params:
       document_store: DocumentStore
       top_k: 10 # The number of results to return
-  - name: PromptNode # The component that actually fetches answers from among the 20 documents returned by retriever 
-    type: PromptNode # Transformer-based reader, specializes in extractive QA
+  - name: PromptNode # The component that generates the answer based on the documents it gets from the retriever 
+    type: PromptNode 
     params:
-      default_prompt_template: question-answering # An optimized variant of BERT, a strong all-round model
-      model_name_or_path: google/flan-t5-large
-  - name: InputDocumentShaper
+      default_prompt_template: question-answering # PromptTemplate defines the task you want the PromptNode to do. Here, we want it to generate an answer to our question
+      model_name_or_path: google/flan-t5-large # A default large language model for PromptNode
+  - name: InputDocumentShaper # This Shaper node combines all documents from the retriever into one so that the model can generate an answer based on all documents
     type: Shaper
     params:
-      func: join_documents
+      func: join_documents # Specifies the Shaper function to use, here we want it to combine all documents into one
       inputs:
         documents: documents
       outputs:
         - documents
       params:
         delimiter: " - "
-  - name: InputQuestionsShaper
+  - name: InputQuestionsShaper # We need this shaper to make sure PromptNode gets the query as a `questions` object
     type: Shaper
     params:
-      func: value_to_list
+      func: value_to_list # Specifies the Shaper function, here we want it to turn the value into a list of values
       inputs:
         value: query
       outputs:
         - questions
       params:
         target_list: [1]
-  - name: OutputAnswerShaper
+  - name: OutputAnswerShaper # We need this Shaper to convert the output of PromptNode into proper answers
     type: Shaper
     params:
-      func: strings_to_answers
+      func: strings_to_answers # This specifies the Shaper function to use, here we want it to convert strings into answers
       inputs:
         strings: results
       outputs:
