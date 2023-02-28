@@ -35,6 +35,7 @@ components:
         - documents
       params:
         delimiter: " - "
+      publish_outputs: false
   - name: InputQuestionsShaper # We need this shaper to make sure PromptNode gets the query as a `questions` object
     type: Shaper
     params:
