@@ -1,0 +1,102 @@
+# If you need help with the YAML format, have a look at https://docs.cloud.deepset.ai/docs/create-a-pipeline#create-a-pipeline-using-yaml.
+# This is a friendly editor that helps you create your pipelines with autosuggestions. To use them, press Control + Space on your keyboard.
+# Whenever you need to specify a model, this editor helps you out as well. Just type your Hugging Face organization and a forward slash (/) to see available models.
+
+# This is a Generative Question Answering pipeline for English with a good vector-based Retriever and Google's open-source FLAN-T5 model. Recommended for advanced users who want more control over models and prompts.
+version: '1.14.0'
+name: 'GenerativeQuestionAnswering_FLAN-T5'
+
+# This section defines the nodes you want to use in your pipelines. Each node must have a name and a type. You can also set the node's parameters here.
+# The name is up to you, you can give your component a friendly name. You then use components' names when specifying their order in the pipeline.
+# Type is the class name of the component. 
+components:
+  - name: DocumentStore
+    type: DeepsetCloudDocumentStore # The only supported document store in deepset Cloud
+  - name: Retriever # Selects the most relevant documents from the document store so that the OpenAI model can base it's generation on it. 
+    type: EmbeddingRetriever # Uses a Transformer model to encode the document and the query
+    params:
+      document_store: DocumentStore
+      embedding_model: sentence-transformers/multi-qa-mpnet-base-dot-v1 # Model optimized for semantic search 
+      model_format: sentence_transformers
+      top_k: 1 # The number of documents to return
+  - name: PromptNode # The component that generates the answer based on the documents it gets from the retriever 
+    type: PromptNode
+    params:
+      default_prompt_template: question-answering # PromptTemplate defines the task you want the PromptNode to do. Here, we want it to generate an answer to our question
+      model_name_or_path:  google/flan-t5-large # A default large language model for PromptNode
+      top_k: 3 # The number of answers to generate
+  - name: InputDocumentShaper # This Shaper node combines all documents from the retriever into one so that the model can generate an answer based on all documents
+    type: Shaper
+    params:
+      func: join_documents # Specifies the Shaper function to use, here we want it to combine all documents into one
+      inputs:
+        documents: documents
+      outputs:
+        - documents
+      params:
+        delimiter: " - "
+      publish_outputs: false
+  - name: InputQuestionsShaper # We need this shaper to make sure PromptNode gets the query as a `questions` object
+    type: Shaper
+    params:
+      func: value_to_list # Specifies the Shaper function, here we want it to turn the value into a list of values
+      inputs:
+        value: query
+      outputs:
+        - questions
+      params:
+        target_list: [1]
+  - name: OutputAnswerShaper # We need this Shaper to convert the output of PromptNode into proper answers
+    type: Shaper
+    params:
+      func: strings_to_answers # This specifies the Shaper function to use, here we want it to convert strings into answers
+      inputs:
+        strings: results
+      outputs:
+        - answers
+  - name: FileTypeClassifier # Routes files based on their extension to appropriate converters, by default txt, pdf, md, docx, html
+    type: FileTypeClassifier
+  - name: TextConverter # Converts files into documents
+    type: TextConverter
+  - name: PDFConverter # Converts PDFs into documents
+    type: PDFToTextConverter
+  - name: Preprocessor # Splits documents into smaller ones and cleans them up
+    type: PreProcessor
+    params:
+      # With a vector-based retriever, it's good to split your documents into smaller ones
+      split_by: word # The unit by which you want to split the documents
+      split_length: 250 # The max number of words in a document
+      split_overlap: 30 # Enables the sliding window approach
+      split_respect_sentence_boundary: True # Retains complete sentences in split documents
+      language: en # Used by NLTK to best detect the sentence boundaries for that language
+
+# Here you define how the nodes are organized in the pipelines
+# For each node, specify its input
+pipelines:
+  - name: query
+    nodes:
+      - name: Retriever
+        inputs: [Query]
+      - name: InputDocumentShaper
+        inputs: [Retriever]
+      - name: InputQuestionsShaper
+        inputs: [InputDocumentShaper]
+      - name: PromptNode
+        inputs: [InputQuestionsShaper]
+      - name: OutputAnswerShaper
+        inputs: [PromptNode]
+  - name: indexing
+    nodes:
+    # Depending on the file type, we use a Text or PDF converter
+      - name: FileTypeClassifier
+        inputs: [File]
+      - name: TextConverter
+        inputs: [FileTypeClassifier.output_1] # Ensures this converter receives TXT files
+      - name: PDFConverter
+        inputs: [FileTypeClassifier.output_2] # Ensures this converter receives PDFs
+      - name: Preprocessor
+        inputs: [TextConverter, PDFConverter]
+      - name: Retriever
+        inputs: [Preprocessor]
+      - name: DocumentStore
+        inputs: [Retriever]
