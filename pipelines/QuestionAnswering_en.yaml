@@ -22,7 +22,7 @@ components:
   - name: Reader # The component that actually fetches answers from among the 20 documents returned by retriever 
     type: FARMReader # Transformer-based reader, specializes in extractive QA
     params:
-      model_name_or_path: deepset/deberta-v3-base-squad2 # An optimized variant of BERT, a strong all-round model
+      model_name_or_path: deepset/deberta-v3-large-squad2 # An optimized variant of BERT, a strong all-round model
       context_window_size: 700 # The size of the window around the answer span
   - name: FileTypeClassifier # Routes files based on their extension to appropriate converters, by default txt, pdf, md, docx, html
     type: FileTypeClassifier
