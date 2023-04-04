@@ -25,10 +25,11 @@ components:
       default_prompt_template: question-answering # PromptTemplate defines the task you want the PromptNode to do. Here, we want it to generate an answer to our question
       model_name_or_path:  google/flan-t5-large # A default large language model for PromptNode
       top_k: 3 # The number of answers to generate
+      output_parsers: AnswerParser
   - name: InputDocumentShaper # This Shaper node combines all documents from the retriever into one so that the model can generate an answer based on all documents
     type: Shaper
     params:
-      func: join_documents # Specifies the Shaper function to use, here we want it to combine all documents into one
+      func: join # Specifies the Shaper function to use, here we want it to combine all documents into one
       inputs:
         documents: documents
       outputs:
@@ -36,24 +37,7 @@ components:
       params:
         delimiter: " - "
       publish_outputs: false
-  - name: InputQuestionsShaper # We need this shaper to make sure PromptNode gets the query as a `questions` object
-    type: Shaper
-    params:
-      func: value_to_list # Specifies the Shaper function, here we want it to turn the value into a list of values
-      inputs:
-        value: query
-      outputs:
-        - questions
-      params:
-        target_list: [1]
-  - name: OutputAnswerShaper # We need this Shaper to convert the output of PromptNode into proper answers
-    type: Shaper
-    params:
-      func: strings_to_answers # This specifies the Shaper function to use, here we want it to convert strings into answers
-      inputs:
-        strings: results
-      outputs:
-        - answers
+  
   - name: FileTypeClassifier # Routes files based on their extension to appropriate converters, by default txt, pdf, md, docx, html
     type: FileTypeClassifier
   - name: TextConverter # Converts files into documents
@@ -83,8 +67,6 @@ pipelines:
         inputs: [InputDocumentShaper]
       - name: PromptNode
         inputs: [InputQuestionsShaper]
-      - name: OutputAnswerShaper
-        inputs: [PromptNode]
   - name: indexing
     nodes:
     # Depending on the file type, we use a Text or PDF converter
