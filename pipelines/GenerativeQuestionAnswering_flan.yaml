@@ -25,18 +25,6 @@ components:
       default_prompt_template: question-answering # PromptTemplate defines the task you want the PromptNode to do. Here, we want it to generate an answer to our question
       model_name_or_path:  google/flan-t5-large # A default large language model for PromptNode
       top_k: 3 # The number of answers to generate
-      output_parsers: AnswerParser
-  - name: InputDocumentShaper # This Shaper node combines all documents from the retriever into one so that the model can generate an answer based on all documents
-    type: Shaper
-    params:
-      func: join # Specifies the Shaper function to use, here we want it to combine all documents into one
-      inputs:
-        documents: documents
-      outputs:
-        - documents
-      params:
-        delimiter: " - "
-      publish_outputs: false
   
   - name: FileTypeClassifier # Routes files based on their extension to appropriate converters, by default txt, pdf, md, docx, html
     type: FileTypeClassifier
@@ -61,12 +49,9 @@ pipelines:
     nodes:
       - name: Retriever
         inputs: [Query]
-      - name: InputDocumentShaper
-        inputs: [Retriever]
-      - name: InputQuestionsShaper
-        inputs: [InputDocumentShaper]
+
       - name: PromptNode
-        inputs: [InputQuestionsShaper]
+        inputs: [Retriever]
   - name: indexing
     nodes:
     # Depending on the file type, we use a Text or PDF converter
