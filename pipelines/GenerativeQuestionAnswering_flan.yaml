@@ -25,7 +25,6 @@ components:
       default_prompt_template: question-answering # PromptTemplate defines the task you want the PromptNode to do. Here, we want it to generate an answer to our question
       model_name_or_path:  google/flan-t5-large # A default large language model for PromptNode
       top_k: 3 # The number of answers to generate
-  
   - name: FileTypeClassifier # Routes files based on their extension to appropriate converters, by default txt, pdf, md, docx, html
     type: FileTypeClassifier
   - name: TextConverter # Converts files into documents
@@ -49,7 +48,6 @@ pipelines:
     nodes:
       - name: Retriever
         inputs: [Query]
-
       - name: PromptNode
         inputs: [Retriever]
   - name: indexing
