@@ -3,7 +3,7 @@
 # Whenever you need to specify a model, this editor helps you out as well. Just type your Hugging Face organization and a forward slash (/) to see available models.
 
 # This is a Generative Question Answering pipeline for English with a good vector-based Retriever and Google's open-source FLAN-T5 model. Recommended for advanced users who want more control over models and prompts.
-version: '1.16.0'
+version: '1.17.1'
 name: 'GenerativeQuestionAnswering_FLAN-T5'
 
 # This section defines the nodes you want to use in your pipelines. Each node must have a name and a type. You can also set the node's parameters here.
