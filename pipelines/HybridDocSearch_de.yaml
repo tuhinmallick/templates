@@ -32,7 +32,7 @@ components:
     type: SentenceTransformersRanker
     params:
       model_name_or_path: svalabs/cross-electra-ms-marco-german-uncased # Model optimized for reranking
-      top_k: 10 # The number of results to return
+      top_k: 20 # The number of results to return
       batch_size: 30  # Try to keep this number equal to or greater than the sum of the top_k of the two retrievers so all docs are processed at once
   - name: FileTypeClassifier # Routes files based on their extension to appropriate converters, useful if you have different file types
     type: FileTypeClassifier
