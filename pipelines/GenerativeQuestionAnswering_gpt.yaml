@@ -4,7 +4,7 @@
 
 # This is a Generative Question Answering pipeline for English with a good vector-based Retriever and OpenAI's GPT-3.5 model as a PromptNode
 version: '1.18.1'
-name: 'GenerativeQuestionAnswering_GPT-35'
+name: 'GenerativeQuestionAnswering_GPT-3.5'
 
 # This section defines nodes that you want to use in your pipelines. Each node must have a name and a type. You can also set the node's parameters here.
 # The name is up to you, you can give your component a friendly name. You then use components' names when specifying their order in the pipeline.
@@ -110,4 +110,4 @@ pipelines:
       - name: EmbeddingRetriever
         inputs: [Preprocessor]
       - name: DocumentStore
-        inputs: [Retriever]
+        inputs: [EmbeddingRetriever]
