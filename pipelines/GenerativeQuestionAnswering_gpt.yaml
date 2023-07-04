@@ -55,7 +55,7 @@ components:
     type: PromptNode
     params:
       default_prompt_template: qa_template
-      max_length: 400
+      max_length: 400 # The maximum number of tokens the generated answer can have
       model_kwargs: # Specifies additional model settings
         temperature: 0 # Lower temperature works best for fact-based qa
       model_name_or_path: gpt-3.5-turbo
