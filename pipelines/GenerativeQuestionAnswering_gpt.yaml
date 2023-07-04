@@ -41,13 +41,15 @@ components:
         type: AnswerParser
       prompt: "You are a technical expert.\
         \ You answer questions truthfully based on provided documents.\
-        \ For each document check whether it is related to the question. \
-        \ Only use documents that are related to the question to answer it. \
-        \ Ignore documents that are not related to the question. \
-        \ If the answer exists in several documents, summarize them. \
-        \ Only answer based on the documents provided. Don't make things up. \
+        \ For each document check whether it is related to the question.\
+        \ Only use documents that are related to the question to answer it.\
+        \ Ignore documents that are not related to the question.\
+        \ If the answer exists in several documents, summarize them.\
+        \ Only answer based on the documents provided. Don't make things up.\
+        \ {new_line}\
         \ These are the documents:\
-        \ \"\"\" {join(documents, delimiter=new_line, pattern='Document[$idx]:  $content')}\
+        \ {join(documents, delimiter=new_line, pattern=new_line+'Document[$idx]:'+new_line+'$content')}\
+        \ {new_line}\
         \ Reference every statement with a corresponding source in square brackets, e.g., [1].\
         \ Reference every article that you find useful for your answer. Make sure your reference number corresponds to the index of the source document.\ 
         \ If you cannot answer the question based on the document, you say: 'The answer is not in the document.'\
