@@ -3,7 +3,7 @@
 # Whenever you need to specify a model, this editor helps you out as well. Just type your Hugging Face organization and a forward slash (/) to see available models.
 
 # This is a Generative Question Answering pipeline for English with a good vector-based Retriever and OpenAI's GPT-3.5 model as a PromptNode
-version: '1.17.1'
+version: '1.18.1'
 name: 'GenerativeQuestionAnswering_GPT-35'
 
 # This section defines nodes that you want to use in your pipelines. Each node must have a name and a type. You can also set the node's parameters here.
@@ -32,16 +32,19 @@ components:
     type: SentenceTransformersRanker
     params:
       model_name_or_path: cross-encoder/ms-marco-MiniLM-L-12-v2 # Best performing model on the cross-encoders website https://www.sbert.net/docs/pretrained-models/ce-msmarco.html
-      top_k: 3 # The number of results to return
+      top_k: 4 # The number of results to return
       batch_size: 20  # Try to keep this number equal or larger to the sum of the top_k of the two retrievers so all docs are processed at once
   - name: qa_template
     type: PromptTemplate
     params:
-      name: qa-new
       output_parser:
         type: AnswerParser
-      prompt_text: "You are a technical expert.\
+      prompt: "You are a technical expert.\
         \ You answer questions truthfully based on provided documents.\
+        \ For each document check whether it is related to the question. \
+        \ Only use documents that are related to the question to answer it. \
+        \ Ignore documents that are not related to the question. \
+        \ If the answer exists in several documents, summarize them. \
         \ Only answer based on the documents provided. Don't make things up. \
         \ These are the documents:\
         \ \"\"\" {join(documents, delimiter=new_line, pattern='Document[$idx]:  $content')}\
@@ -101,7 +104,7 @@ pipelines:
         inputs: [FileTypeClassifier.output_2] # Ensures that this converter receives PDFs
       - name: Preprocessor
         inputs: [TextConverter, PDFConverter]
-      - name: Retriever
+      - name: EmbeddingRetriever
         inputs: [Preprocessor]
       - name: DocumentStore
         inputs: [Retriever]
