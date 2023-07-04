@@ -56,7 +56,7 @@ components:
     params:
       default_prompt_template: qa_template
       max_length: 400
-      model_kwargs:
+      model_kwargs: # Specifies additional model settings
         temperature: 0 # Lower temperature works best for fact-based qa
       model_name_or_path: gpt-3.5-turbo
   - name: FileTypeClassifier # Routes files based on their extension to appropriate converters, by default txt, pdf, md, docx, html
