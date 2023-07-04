@@ -16,18 +16,24 @@ components:
     type: BM25Retriever
     params:
       document_store: DocumentStore
-      top_k: 20 # The number of results to return
-  - name: EmbeddingRetriever # The vector-based retriever
-    type: EmbeddingRetriever
+      top_k: 15 # The number of results to return
+  - name: EmbeddingRetriever # Selects the most relevant documents from the document store
+    type: EmbeddingRetriever # Uses a Transformer model to encode the document and the query
     params:
       document_store: DocumentStore
-      embedding_model: sentence-transformers/multi-qa-mpnet-base-dot-v1 # Model optimized for semantic search
+      embedding_model: sentence-transformers/multi-qa-mpnet-base-dot-v1 # Model optimized for semantic search. It has been trained on 215M (question, answer) pairs from diverse sources.
       model_format: sentence_transformers
-      top_k: 20 # The number of results to return
+      top_k: 15 # The number of results to return
   - name: JoinResults # Joins the results from both retrievers
     type: JoinDocuments
     params:
-      join_mode: reciprocal_rank_fusion # Applies rank-based scoring to the results
+      join_mode: concatenate # Combines documents from multiple retrievers
+  - name: Reranker # Uses a cross-encoder model to rerank the documents returned by the two retrievers
+    type: SentenceTransformersRanker
+    params:
+      model_name_or_path: cross-encoder/ms-marco-MiniLM-L-6-v2 # Fast model optimized for reranking
+      top_k: 10 # The number of results to return
+      batch_size: 30  # Try to keep this number equal to or greater than the sum of the top_k of the two retrievers so all docs are processed at once
   - name: FileTypeClassifier # Routes files based on their extension to appropriate converters, useful if you have different file types
     type: FileTypeClassifier
   - name: TextConverter # Converts files into documents
@@ -55,6 +61,8 @@ pipelines:
         inputs: [Query]
       - name: JoinResults
         inputs: [BM25Retriever, EmbeddingRetriever]
+      - name: Reranker
+        inputs: [JoinResults]
   - name: indexing
     nodes:
       # Depending on the file type, we use a Text or PDF converter
