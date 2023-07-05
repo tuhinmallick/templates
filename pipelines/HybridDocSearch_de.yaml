@@ -21,7 +21,7 @@ components:
     type: EmbeddingRetriever # Uses a Transformer model to encode the document and the query
     params:
       document_store: DocumentStore
-      embedding_model: PM-AI/bi-encoder_msmarco_bert-base_german # Model optimized for semantic search. It has been trained on 215M (question, answer) pairs from diverse sources.
+      embedding_model: PM-AI/bi-encoder_msmarco_bert-base_german # Model optimized for semantic search.
       model_format: sentence_transformers
       top_k: 15 # The number of results to return
   - name: JoinResults # Joins the results from both retrievers
