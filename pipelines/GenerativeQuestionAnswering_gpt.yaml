@@ -50,13 +50,14 @@ components:
         \ The reference must only refer to the number that comes in square brackets after passage.\
         \ Otherwise, do not use brackets in your answer and reference ONLY the number of the passage without mentioning the word passage.\
         \ If the documents can't answer the question or you are unsure say: 'The answer can't be found in the text'.\
-        \ {new_line}\
-        \ These are the documents:\
+        \{new_line}\
+        \These are the documents:\
         \ {join(documents, delimiter=new_line, pattern=new_line+'Document[$idx]:'+new_line+'$content')}\
-        \ {new_line}\
-        \ Question: {query}\
-        \ Answer:\
-        \ {new_line}"
+        \{new_line}\
+        \Question: {query}\
+        \{new_line}\
+        \Answer:\
+        \{new_line}"
   - name: PromptNode
     type: PromptNode
     params:
