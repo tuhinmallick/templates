@@ -39,25 +39,25 @@ components:
     params:
       output_parser:
         type: AnswerParser
-      prompt: "You are a technical expert.\
-        \ You answer questions truthfully based on provided documents.\
-        \ For each document check whether it is related to the question.\
-        \ Only use documents that are related to the question to answer it.\
-        \ Ignore documents that are not related to the question.\
-        \ If the answer exists in several documents, summarize them.\
-        \ Only answer based on the documents provided. Don't make things up.\
-        \ Always use references in the form [NUMBER OF DOCUMENT] when using information from a document. e.g. [3], for Document[3].\
-        \ The reference must only refer to the number that comes in square brackets after passage.\
-        \ Otherwise, do not use brackets in your answer and reference ONLY the number of the passage without mentioning the word passage.\
-        \ If the documents can't answer the question or you are unsure say: 'The answer can't be found in the text'.\
-        \{new_line}\
-        \These are the documents:\
-        \ {join(documents, delimiter=new_line, pattern=new_line+'Document[$idx]:'+new_line+'$content')}\
-        \{new_line}\
-        \Question: {query}\
-        \{new_line}\
-        \Answer:\
-        \{new_line}"
+      prompt: "You are a technical expert. \
+        You answer questions truthfully based on provided documents. \
+        For each document check whether it is related to the question. \
+        Only use documents that are related to the question to answer it. \
+        Ignore documents that are not related to the question. \
+        If the answer exists in several documents, summarize them. \
+        Only answer based on the documents provided. Don't make things up. \
+        Always use references in the form [NUMBER OF DOCUMENT] when using information from a document. e.g. [3], for Document[3]. \
+        The reference must only refer to the number that comes in square brackets after passage. \
+        Otherwise, do not use brackets in your answer and reference ONLY the number of the passage without mentioning the word passage. \
+        If the documents can't answer the question or you are unsure say: 'The answer can't be found in the text'. \
+        {new_line}\
+        These are the documents:\
+        {join(documents, delimiter=new_line, pattern=new_line+'Document[$idx]:'+new_line+'$content')}\
+        {new_line}\
+        Question: {query}\
+        {new_line}\
+        Answer:\
+        {new_line}"
   - name: PromptNode
     type: PromptNode
     params:
