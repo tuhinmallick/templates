@@ -1,0 +1,80 @@
+# If you need help with the YAML format, have a look at https://docs.cloud.deepset.ai/docs/create-a-pipeline#create-a-pipeline-using-yaml.
+# This is a friendly editor that helps you create your pipelines with autosuggestions. To use them, press Control + Space on your keyboard.
+# Whenever you need to specify a model, this editor helps you out as well. Just type your Hugging Face organization and a forward slash (/) to see available models.
+
+# This is a document search pipeline for German that combines vector-based and keyword-based searches. Such combination usually yields the best results without any training.
+version: '1.17.1'
+name: 'HybridDocumentSearch_de'
+
+# This section defines nodes that you want to use in your pipelines. Each node must have a name and a type. You can also set the node's parameters here.
+# The name is up to you, you can give your component a friendly name. You then use components' names when specifying their order in the pipeline.
+# Type is the class name of the component.
+components:
+  - name: DocumentStore
+    type: DeepsetCloudDocumentStore # The only supported document store in deepset Cloud
+  - name: BM25Retriever # The keyword-based retriever
+    type: BM25Retriever
+    params:
+      document_store: DocumentStore
+      top_k: 15 # The number of results to return
+  - name: EmbeddingRetriever # Selects the most relevant documents from the document store
+    type: EmbeddingRetriever # Uses a Transformer model to encode the document and the query
+    params:
+      document_store: DocumentStore
+      embedding_model: PM-AI/bi-encoder_msmarco_bert-base_german # Model optimized for semantic search.
+      model_format: sentence_transformers
+      top_k: 15 # The number of results to return
+  - name: JoinResults # Joins the results from both retrievers
+    type: JoinDocuments
+    params:
+      join_mode: concatenate # Combines documents from multiple retrievers
+  - name: Reranker # Uses a cross-encoder model to rerank the documents returned by the two retrievers
+    type: SentenceTransformersRanker
+    params:
+      model_name_or_path: svalabs/cross-electra-ms-marco-german-uncased # Model optimized for reranking
+      top_k: 20 # The number of results to return
+      batch_size: 30  # Try to keep this number equal to or greater than the sum of the top_k of the two retrievers so all docs are processed at once
+  - name: FileTypeClassifier # Routes files based on their extension to appropriate converters, useful if you have different file types
+    type: FileTypeClassifier
+  - name: TextConverter # Converts files into documents
+    type: TextConverter
+  - name: PDFConverter # Converts PDFs into documents
+    type: PDFToTextConverter
+  - name: Preprocessor # Splits documents into smaller ones and cleans them up
+    type: PreProcessor
+    params:
+      # With a vector-based retriever, it's good to split your documents into smaller ones
+      split_by: word # The unit by which you want to split the documents
+      split_length: 250 # The max number of words in a document
+      split_overlap: 30 # Enables the sliding window approach
+      split_respect_sentence_boundary: True # Retains complete sentences in split documents
+      language: de # Used by NLTK to best detect the sentence boundaries for that language
+
+# Here you define how the nodes are organized in the pipelines
+# For each node, specify its input
+pipelines:
+  - name: query
+    nodes:
+      - name: BM25Retriever
+        inputs: [Query]
+      - name: EmbeddingRetriever
+        inputs: [Query]
+      - name: JoinResults
+        inputs: [BM25Retriever, EmbeddingRetriever]
+      - name: Reranker
+        inputs: [JoinResults]
+  - name: indexing
+    nodes:
+      # Depending on the file type, we use a Text or PDF converter
+      - name: FileTypeClassifier
+        inputs: [File]
+      - name: TextConverter
+        inputs: [FileTypeClassifier.output_1] # Ensures this converter gets TXT files
+      - name: PDFConverter
+        inputs: [FileTypeClassifier.output_2] # Ensures this converter gets PDF files
+      - name: Preprocessor
+        inputs: [TextConverter, PDFConverter]
+      - name: EmbeddingRetriever
+        inputs: [Preprocessor]
+      - name: DocumentStore
+        inputs: [EmbeddingRetriever]
