@@ -2,9 +2,9 @@
 # This is a friendly editor that helps you create your pipelines with autosuggestions. To use them, press control + space on your keyboard.
 # Whenever you need to specify a model, this editor helps you out as well. Just type your Hugging Face organization and a forward slash (/) to see available models.
 
-# This is a Generative Question Answering pipeline for English with a good vector-based Retriever and OpenAI's GPT-3 model as a Generator
+# This is a Generative Question Answering pipeline for English with a good vector-based Retriever and OpenAI's GPT-3.5 model as a PromptNode
 version: '1.18.0'
-name: 'GenerativeQuestionAnswering_GPT-3'
+name: 'GenerativeQuestionAnswering_GPT-3.5'
 
 # This section defines nodes that you want to use in your pipelines. Each node must have a name and a type. You can also set the node's parameters here.
 # The name is up to you, you can give your component a friendly name. You then use components' names when specifying their order in the pipeline.
@@ -12,22 +12,60 @@ name: 'GenerativeQuestionAnswering_GPT-3'
 components:
   - name: DocumentStore
     type: DeepsetCloudDocumentStore
-  - name: Retriever # Selects the most relevant documents from the document store so that the OpenAI model can base it's generation on it. 
+  - name: BM25Retriever # The keyword-based retriever
+    type: BM25Retriever
+    params:
+      document_store: DocumentStore
+      top_k: 10 # The number of results to return
+  - name: EmbeddingRetriever # Selects the most relevant documents from the document store
     type: EmbeddingRetriever # Uses a Transformer model to encode the document and the query
     params:
       document_store: DocumentStore
-      embedding_model: sentence-transformers/multi-qa-mpnet-base-dot-v1 # Model optimized for semantic search 
+      embedding_model: sentence-transformers/multi-qa-mpnet-base-dot-v1 # Model optimized for semantic search. It has been trained on 215M (question, answer) pairs from diverse sources.
       model_format: sentence_transformers
-      top_k: 3 # The number of documents to return
-  - name: AnswerGen # Generates candidate answers based on the documents it gets from the retriever
-    type: OpenAIAnswerGenerator 
+      top_k: 10 # The number of results to return
+  - name: JoinResults # Joins the results from both retrievers
+    type: JoinDocuments
     params:
-      model: text-davinci-003
-      max_tokens: 200 # The maximum number of tokens allowed for each generated Answer.
-      temperature: 0.8 # Determines the randomness of the model. Higher values mean the model will take more risks
-      frequency_penalty: 0.1 # Positive values penalize new tokens based on their existing frequency in the text so far.
-      presence_penalty: 0.1 #  Positive values penalize new tokens based on whether they have already appeared in the text.
-      top_k: 3 # The number of results to return
+      join_mode: concatenate # Combines documents from multiple retrievers
+  - name: Reranker # Uses a cross-encoder model to rerank the documents returned by the two retrievers
+    type: SentenceTransformersRanker
+    params:
+      model_name_or_path: cross-encoder/ms-marco-MiniLM-L-6-v2 # Fast model optimized for reranking
+      top_k: 4 # The number of results to return
+      batch_size: 20  # Try to keep this number equal or larger to the sum of the top_k of the two retrievers so all docs are processed at once
+  - name: qa_template
+    type: PromptTemplate
+    params:
+      output_parser:
+        type: AnswerParser
+      prompt: "You are a technical expert. \
+        You answer questions truthfully based on provided documents. \
+        For each document check whether it is related to the question. \
+        Only use documents that are related to the question to answer it. \
+        Ignore documents that are not related to the question. \
+        If the answer exists in several documents, summarize them. \
+        Only answer based on the documents provided. Don't make things up. \
+        Always use references in the form [NUMBER OF DOCUMENT] when using information from a document. e.g. [3], for Document[3]. \
+        The reference must only refer to the number that comes in square brackets after passage. \
+        Otherwise, do not use brackets in your answer and reference ONLY the number of the passage without mentioning the word passage. \
+        If the documents can't answer the question or you are unsure say: 'The answer can't be found in the text'. \
+        {new_line}\
+        These are the documents:\
+        {join(documents, delimiter=new_line, pattern=new_line+'Document[$idx]:'+new_line+'$content')}\
+        {new_line}\
+        Question: {query}\
+        {new_line}\
+        Answer:\
+        {new_line}"
+  - name: PromptNode
+    type: PromptNode
+    params:
+      default_prompt_template: qa_template
+      max_length: 400 # The maximum number of tokens the generated answer can have
+      model_kwargs: # Specifies additional model settings
+        temperature: 0 # Lower temperature works best for fact-based qa
+      model_name_or_path: gpt-3.5-turbo
   - name: FileTypeClassifier # Routes files based on their extension to appropriate converters, by default txt, pdf, md, docx, html
     type: FileTypeClassifier
   - name: TextConverter # Converts files into documents
@@ -49,10 +87,16 @@ components:
 pipelines:
   - name: query
     nodes:
-      - name: Retriever
+      - name: BM25Retriever
         inputs: [Query]
-      - name: AnswerGen
-        inputs: [Retriever]
+      - name: EmbeddingRetriever
+        inputs: [Query]
+      - name: JoinResults
+        inputs: [BM25Retriever, EmbeddingRetriever]
+      - name: Reranker
+        inputs: [JoinResults]
+      - name: PromptNode
+        inputs: [Reranker]
   - name: indexing
     nodes:
     # Depending on the file type, we use a Text or PDF converter
@@ -64,7 +108,7 @@ pipelines:
         inputs: [FileTypeClassifier.output_2] # Ensures that this converter receives PDFs
       - name: Preprocessor
         inputs: [TextConverter, PDFConverter]
-      - name: Retriever
+      - name: EmbeddingRetriever
         inputs: [Preprocessor]
       - name: DocumentStore
-        inputs: [Retriever]
+        inputs: [EmbeddingRetriever]
