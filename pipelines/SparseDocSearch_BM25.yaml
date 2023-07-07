@@ -4,7 +4,7 @@
 
 # A pipeline for document search that uses a traditional, keyword-based retriever (using Elasticsearch's BM25 algorithm).
 # It relies on matching keywords between query and document and is often a solid baseline to start with.
-version: '1.17.1'
+version: '1.18.0'
 name: 'KeywordDocumentSearch'
 
 # This section defines nodes that you want to use in your pipelines. Each node must have a name and a type. You can also set the node's parameters here.
