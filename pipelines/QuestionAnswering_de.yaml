@@ -4,7 +4,7 @@
 
 
 # This is a baseline Question Answering pipeline for German. It uses a vector-based search and a German QA model.
-version: '1.21.0'
+version: '1.21.2'
 name: 'QuestionAnswering_de'
 
 # This section defines nodes that you want to use in your pipelines. Each node must have a name and a type. You can also set the node's parameters here.
