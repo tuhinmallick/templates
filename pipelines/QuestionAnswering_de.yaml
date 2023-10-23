@@ -14,13 +14,13 @@ components:
   - name: DocumentStore
     type: DeepsetCloudDocumentStore # The only supported document store in deepset Cloud
     params:
-      similarity: cosine # Recommended similarity for paraphrase-multilingual-mpnet-base-v2
+      similarity: cosine # Recommended similarity for intfloat/multilingual-e5-base
   - name: Retriever # Selects the most relevant documents from the document store and then passes them on to the Reader
     type: EmbeddingRetriever # Uses a Transformer model to encode the document and the query
     params:
       document_store: DocumentStore
-      embedding_model: sentence-transformers/paraphrase-multilingual-mpnet-base-v2
-      model_format: sentence_transformers
+      embedding_model: intfloat/multilingual-e5-base  # Model optimized for semantic search on over 90 languages including German. Check https://huggingface.co/intfloat/multilingual-e5-base for more information.
+      model_format: transformers
       scale_score: false
       top_k: 20 # The number of results to return
   # A "Reader" model that goes through those 20 candidate documents and identifies the exact answer
